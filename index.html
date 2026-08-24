@@ -73,8 +73,6 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 
 /* ===== Toolbar ===== */
 .toolbar{display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
-.input,.select{padding:7px 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);font-size:13px;transition:border-color 0.1s,box-shadow 0.1s;width:100%}
-.input:focus,.select:focus{outline:none;border-color:var(--text);box-shadow:0 0 0 3px rgba(10,10,10,0.06)}
 .search-wrap{position:relative;flex:1;min-width:200px;max-width:340px}
 .search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-muted);stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 .search-input{padding-left:32px}
@@ -85,6 +83,18 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .cell-input.num{text-align:right}
 .cell-input:hover{background:var(--bg-muted)}
 .cell-input:focus{outline:none;background:var(--bg);border-color:var(--border-strong);box-shadow:0 0 0 2px rgba(10,10,10,0.04)}
+
+/* ===== Inline-Edit Zellen (Artikel) ===== */
+.ie-cell{padding:8px 12px;cursor:text;border-bottom:1px solid var(--border);position:relative;min-height:38px;display:flex;align-items:center}
+.ie-cell:hover{background:var(--bg-soft)}
+.ie-cell:focus-within{background:#fffceb;box-shadow:inset 0 0 0 2px var(--accent)}
+.ie-cell.empty::before{content:attr(data-placeholder);color:var(--text-muted);font-style:italic}
+.ie-input{border:none;background:transparent;outline:none;width:100%;font-size:13px;color:var(--text);font-family:inherit;padding:0}
+.ie-input.num{text-align:right;font-variant-numeric:tabular-nums}
+.ie-input::placeholder{color:var(--text-muted);font-style:italic}
+.ie-select{border:none;background:transparent;outline:none;cursor:pointer;width:100%;font-size:13px;color:var(--text);font-family:inherit;appearance:none;-webkit-appearance:none;padding:0}
+@keyframes rowFlash{0%{background:var(--success-soft)}100%{background:transparent}}
+.row-flash{animation:rowFlash 1.2s ease-out}
 
 /* ===== Table ===== */
 .table-wrap{background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow:hidden}
@@ -97,6 +107,7 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .th-num{text-align:right}
 .td-num{text-align:right;font-variant-numeric:tabular-nums}
 .td-calc{background:var(--bg-muted);color:var(--text);font-variant-numeric:tabular-nums;padding:8px 12px;text-align:right}
+.row-linked{box-shadow:inset 3px 0 0 var(--accent)}
 
 /* ===== Section ===== */
 .section{margin-bottom:14px}
@@ -112,19 +123,35 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 /* ===== Modal ===== */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;animation:fadeIn 0.15s}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal{background:var(--bg);border-radius:12px;width:520px;max-width:100%;max-height:90vh;display:flex;flex-direction:column;animation:slideUp 0.2s;box-shadow:0 20px 50px rgba(0,0,0,0.15)}
+.modal{background:var(--bg);border-radius:12px;width:520px;max-width:100%;max-height:90vh;display:flex;flex-direction:column;animation:slideUp 0.2s;box-shadow:0 20px 50px rgba(0,0,0,0.15);overflow:hidden}
+.modal-wide{width:640px}
 @keyframes slideUp{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.modal-title{font-size:15px;font-weight:600}
-.modal-body{padding:20px;overflow-y:auto;flex:1}
-.modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:8px}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.modal-title{font-size:15px;font-weight:600;letter-spacing:-0.01em}
+.modal-body{padding:22px;overflow-y:auto;flex:1}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-shrink:0;background:var(--bg-soft)}
 .modal-footer .right{display:flex;gap:8px}
 
 /* ===== Form ===== */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.form-group{display:flex;flex-direction:column}
-.form-group.full{grid-column:1/-1}
-.form-label{font-size:12px;font-weight:500;color:var(--text-soft);margin-bottom:5px}
+.form-section{margin-bottom:20px}
+.form-section:last-child{margin-bottom:0}
+.form-section-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.form-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:12px;font-weight:500;color:var(--text);letter-spacing:-0.005em}
+.form-label .required{color:var(--danger);margin-left:2px}
+.form-hint{font-size:11px;color:var(--text-muted);margin-top:2px}
+.input,.select{padding:9px 12px;border:1px solid var(--border-strong);border-radius:7px;background:var(--bg);font-size:13.5px;width:100%;color:var(--text);transition:border-color 0.1s,box-shadow 0.1s}
+.input::placeholder{color:var(--text-muted)}
+.input:focus,.select:focus{outline:none;border-color:var(--text);box-shadow:0 0 0 3px rgba(10,10,10,0.06)}
+.select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23525252' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:34px}
+.input-group{position:relative;display:flex;align-items:center}
+.input-prefix,.input-suffix{position:absolute;color:var(--text-muted);font-size:13px;font-weight:500;pointer-events:none;z-index:1}
+.input-prefix{left:12px}
+.input-suffix{right:12px}
+.input-group .input{padding-left:28px}
+.input-group.has-suffix .input{padding-right:36px}
 
 /* ===== Badge ===== */
 .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;background:var(--bg-muted);color:var(--text-soft);white-space:nowrap}
@@ -145,15 +172,53 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 /* ===== Cloud Status ===== */
 .cloud-status{display:flex;gap:8px;align-items:center;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:500;background:var(--bg-muted);transition:all 0.2s}
 .cloud-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--text-muted);transition:all 0.2s}
-.cloud-idle   { color:var(--text-soft) }
-.cloud-idle   .cloud-dot { background:var(--text-muted) }
-.cloud-saving { color:var(--text); background:var(--accent-soft) }
-.cloud-saving .cloud-dot { background:var(--accent); animation:pulse 1s infinite }
-.cloud-saved  { color:var(--success); background:var(--success-soft) }
-.cloud-saved  .cloud-dot { background:var(--success) }
-.cloud-error  { color:var(--danger); background:var(--danger-soft) }
-.cloud-error  .cloud-dot { background:var(--danger) }
+.cloud-idle{color:var(--text-soft)}
+.cloud-idle .cloud-dot{background:var(--text-muted)}
+.cloud-saving{color:var(--text);background:var(--accent-soft)}
+.cloud-saving .cloud-dot{background:var(--accent);animation:pulse 1s infinite}
+.cloud-saved{color:var(--success);background:var(--success-soft)}
+.cloud-saved .cloud-dot{background:var(--success)}
+.cloud-error{color:var(--danger);background:var(--danger-soft)}
+.cloud-error .cloud-dot{background:var(--danger)}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.3)}}
+
+/* ===== Katalog-Popover ===== */
+.kpop-backdrop{position:fixed;inset:0;z-index:90}
+.kpop{position:absolute;z-index:91;width:380px;max-height:420px;background:var(--bg);border:1px solid var(--border-strong);border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,0.15),0 0 0 1px rgba(0,0,0,0.04);display:flex;flex-direction:column;animation:slideUp 0.12s;overflow:hidden}
+.kpop-search{padding:10px;border-bottom:1px solid var(--border);position:relative}
+.kpop-search input{width:100%;padding:7px 10px 7px 30px;border:1px solid var(--border-strong);border-radius:6px;font-size:13px;background:var(--bg)}
+.kpop-search input:focus{outline:none;border-color:var(--text);box-shadow:0 0 0 3px rgba(10,10,10,0.06)}
+.kpop-search svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-muted);stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.kpop-list{flex:1;overflow-y:auto;padding:6px}
+.kpop-item{padding:8px 10px;border-radius:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;transition:background 0.08s}
+.kpop-item:hover,.kpop-item.active{background:var(--bg-muted)}
+.kpop-item-main{min-width:0;flex:1}
+.kpop-item-name{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kpop-item-sub{font-size:11px;color:var(--text-muted);margin-top:1px}
+.kpop-item-price{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpop-empty{padding:30px 20px;text-align:center;color:var(--text-muted);font-size:12px}
+.kpop-footer{padding:8px 10px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);display:flex;justify-content:space-between;background:var(--bg-soft)}
+.kpop-footer kbd{background:var(--bg);border:1px solid var(--border-strong);border-radius:3px;padding:1px 5px;font-size:10px;font-family:ui-monospace,monospace}
+.btn-pick{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;font-size:11px;border:1px solid var(--border);background:var(--bg);border-radius:5px;color:var(--text-soft);cursor:pointer;transition:all 0.1s}
+.btn-pick:hover{background:var(--bg-muted);color:var(--text);border-color:var(--border-strong)}
+.btn-pick.linked{color:var(--success);border-color:var(--success);background:var(--success-soft)}
+
+/* ===== Command Palette ===== */
+.cmdk-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:300;display:flex;align-items:flex-start;justify-content:center;padding-top:min(20vh,120px);animation:fadeIn 0.1s}
+.cmdk{width:560px;max-width:100%;background:var(--bg);border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.25);overflow:hidden;animation:slideUp 0.15s}
+.cmdk-input-wrap{padding:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.cmdk-input-wrap svg{width:18px;height:18px;color:var(--text-muted);flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cmdk-input{flex:1;border:none;outline:none;font-size:15px;background:transparent;color:var(--text)}
+.cmdk-results{max-height:380px;overflow-y:auto;padding:6px}
+.cmdk-group{padding:8px 12px 4px;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;font-weight:500}
+.cmdk-item{padding:9px 12px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px}
+.cmdk-item:hover,.cmdk-item.active{background:var(--bg-muted)}
+.cmdk-item-icon{width:14px;height:14px;color:var(--text-muted);stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cmdk-item-main{flex:1;min-width:0}
+.cmdk-item-name{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmdk-item-sub{font-size:11px;color:var(--text-muted);margin-top:1px}
+.cmdk-hint{padding:10px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);display:flex;justify-content:space-between;background:var(--bg-soft)}
+.cmdk-hint kbd{background:var(--bg);border:1px solid var(--border-strong);border-radius:3px;padding:1px 5px;font-size:10px;font-family:ui-monospace,monospace}
 
 /* ===== Utilities ===== */
 .text-muted{color:var(--text-muted)}
@@ -169,7 +234,7 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 .mt-4{margin-top:16px}
 
 @media print{
-  .sidebar,.header-actions,.section-footer,.add-section-btn,.btn,.modal-backdrop,.toast-container{display:none!important}
+  .sidebar,.header-actions,.section-footer,.add-section-btn,.btn,.modal-backdrop,.cmdk-backdrop,.kpop-backdrop,.kpop,.toast-container{display:none!important}
   .layout{grid-template-columns:1fr}
   .main{padding:0;max-width:100%}
   .card,.section{border:1px solid #ccc!important;box-shadow:none!important}
@@ -200,7 +265,6 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
         Projekte
       </button>
     </div>
-
     <div class="nav-section">
       <div class="nav-title">Daten</div>
       <button class="nav-item" onclick="exportData()">
@@ -216,7 +280,6 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
         Alles zurücksetzen
       </button>
     </div>
-
     <div class="nav-section push-bottom">
       <div id="cloud-status" class="cloud-status cloud-idle">
         <span class="cloud-dot"></span>
@@ -226,9 +289,13 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
         <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
         Jetzt synchronisieren
       </button>
+      <button class="nav-item" onclick="openCmdk()" style="margin-top:6px">
+        <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        Schnellsuche
+        <span style="margin-left:auto;font-size:10px;color:var(--text-muted)">⌘K</span>
+      </button>
     </div>
   </aside>
-
   <main class="main">
     <div id="page-kalk" class="page"></div>
     <div id="page-artikel" class="page" hidden></div>
@@ -270,21 +337,14 @@ const getActiveProject = () => state.projects.find(p => p.id === state.activePro
 let cloudSyncTimer = null;
 let cloudStatus = 'idle';
 let cloudInFlight = false;
-
-function headers(){
-  return { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY };
-}
-
-function isCloudConfigured(){
-  return JSONBIN_API_KEY && !JSONBIN_API_KEY.includes('DEIN');
-}
+function jsonHeaders(){ return { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY }; }
+function isCloudConfigured(){ return JSONBIN_API_KEY && !JSONBIN_API_KEY.includes('DEIN'); }
 
 async function ensureBin(){
   if (JSONBIN_BIN_ID) return JSONBIN_BIN_ID;
-  // Erstelle neuen Bin
   const r = await fetch('https://api.jsonbin.io/v3/b', {
     method: 'POST',
-    headers: headers(),
+    headers: jsonHeaders(),
     body: JSON.stringify({
       articles: state.articles,
       projects: state.projects,
@@ -301,7 +361,7 @@ async function ensureBin(){
 
 async function cloudSave(){
   if (!isCloudConfigured()) return;
-  if (cloudInFlight) { scheduleCloudSave(); return; }
+  if (cloudInFlight){ scheduleCloudSave(); return; }
   cloudInFlight = true;
   cloudStatus = 'saving';
   updateCloudIndicator();
@@ -309,7 +369,7 @@ async function cloudSave(){
     const id = await ensureBin();
     const r = await fetch(`https://api.jsonbin.io/v3/b/${id}`, {
       method: 'PUT',
-      headers: headers(),
+      headers: jsonHeaders(),
       body: JSON.stringify({
         articles: state.articles,
         projects: state.projects,
@@ -320,7 +380,7 @@ async function cloudSave(){
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     cloudStatus = 'saved';
     updateCloudIndicator();
-    setTimeout(() => { if (cloudStatus === 'saved') { cloudStatus = 'idle'; updateCloudIndicator(); } }, 2000);
+    setTimeout(() => { if (cloudStatus === 'saved'){ cloudStatus = 'idle'; updateCloudIndicator(); } }, 2000);
   } catch (e){
     console.error('Cloud save failed:', e);
     cloudStatus = 'error';
@@ -330,10 +390,9 @@ async function cloudSave(){
 }
 
 async function cloudLoad(){
-  if (!isCloudConfigured()) return false;
-  if (!JSONBIN_BIN_ID) return false;
+  if (!isCloudConfigured() || !JSONBIN_BIN_ID) return false;
   try {
-    const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, { headers: headers() });
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, { headers: jsonHeaders() });
     if (r.status === 404){ JSONBIN_BIN_ID = ''; localStorage.removeItem(JSONBIN_BIN_ID_KEY); return false; }
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const d = await r.json();
@@ -344,9 +403,7 @@ async function cloudLoad(){
       state.activeProjectId = data.activeProjectId || null;
       return true;
     }
-  } catch (e){
-    console.warn('Cloud load failed:', e);
-  }
+  } catch (e){ console.warn('Cloud load failed:', e); }
   return false;
 }
 
@@ -362,7 +419,7 @@ function updateCloudIndicator(){
   const el = document.getElementById('cloud-status');
   if (!el) return;
   const map = {
-    idle:   { cls: 'cloud-idle',   text: JSONBIN_BIN_ID ? 'Cloud verbunden' : 'Lokal (noch keine Cloud)' },
+    idle:   { cls: 'cloud-idle',   text: JSONBIN_BIN_ID ? 'Cloud verbunden' : 'Lokal' },
     saving: { cls: 'cloud-saving', text: 'Speichert…' },
     saved:  { cls: 'cloud-saved',  text: 'Gespeichert ✓' },
     error:  { cls: 'cloud-error',  text: 'Sync-Fehler' }
@@ -381,7 +438,6 @@ function save(){
   }));
   scheduleCloudSave();
 }
-
 function loadLocal(){
   const r = localStorage.getItem(STORAGE_KEY);
   if (!r) return false;
@@ -393,17 +449,11 @@ function loadLocal(){
     return true;
   } catch(e){ return false; }
 }
-
 async function load(){
-  // 1) Versuche Cloud (Multi-Device-Sync)
   if (isCloudConfigured() && JSONBIN_BIN_ID){
     const fromCloud = await cloudLoad();
-    if (fromCloud){
-      save(); // spiegele in localStorage
-      return true;
-    }
+    if (fromCloud){ save(); return true; }
   }
-  // 2) Fallback auf localStorage
   return loadLocal();
 }
 
@@ -497,23 +547,30 @@ function renderKalk(){
 
 function renderSections(){
   const c = document.getElementById('sections-list');
+  if (!c) return;
   c.innerHTML = getActiveProject().sections.map((s,i) => renderSection(s,i)).join('');
 }
+
 function renderSection(s, sIdx){
   const c = calcSection(s);
   return `
     <div class="section">
       <div class="section-header">
         <input type="text" value="${esc(s.name)}" onchange="updateSection(${sIdx},'name',this.value)">
-        <button class="btn btn-icon btn-ghost" onclick="deleteSection(${sIdx})" title="Bereich löschen">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        </button>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-icon btn-ghost" onclick="duplicateSection(${sIdx})" title="Bereich duplizieren">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <button class="btn btn-icon btn-ghost" onclick="deleteSection(${sIdx})" title="Bereich löschen">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
       </div>
       <div class="section-body">
         <div class="section-table-scroll">
           <table class="table section-table">
             <thead><tr>
-              <th style="min-width:200px">Artikel</th>
+              <th style="min-width:240px">Artikel</th>
               <th class="th-num" style="width:60px">Anz.</th>
               <th style="width:70px">Einh.</th>
               <th class="th-num" style="width:80px">EK/Stk</th>
@@ -525,7 +582,7 @@ function renderSection(s, sIdx){
               <th class="th-num" style="width:95px">VK</th>
               <th class="th-num" style="width:85px">DB</th>
               <th class="th-num" style="width:60px">DB %</th>
-              <th style="width:36px"></th>
+              <th style="width:60px"></th>
             </tr></thead>
             <tbody>${s.items.map((it,iIdx)=>renderItem(sIdx,iIdx,it)).join('')}</tbody>
             <tfoot><tr>
@@ -548,10 +605,20 @@ function renderSection(s, sIdx){
       </div>
     </div>`;
 }
+
 function renderItem(sIdx,iIdx,it){
   const c = calcItem(it);
-  return `<tr>
-    <td><input class="cell-input text" type="text" value="${esc(it.name)}" onchange="updateItem(${sIdx},${iIdx},'name',this.value)"></td>
+  const linked = !!it.articleId;
+  return `<tr class="${linked ? 'row-linked' : ''}">
+    <td>
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 12px">
+        <button class="btn-pick ${linked ? 'linked' : ''}" onclick="openKpop(${sIdx},${iIdx},this)" title="Artikel aus Katalog zuordnen">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          ${linked ? 'Zugeordnet' : 'Zuordnen'}
+        </button>
+        <input class="cell-input text" type="text" value="${esc(it.name)}" onchange="updateItem(${sIdx},${iIdx},'name',this.value)" style="flex:1">
+      </div>
+    </td>
     <td><input class="cell-input num" type="text" inputmode="decimal" value="${it.anzahl??''}" onchange="updateItem(${sIdx},${iIdx},'anzahl',this.value)"></td>
     <td><input class="cell-input text" type="text" value="${esc(it.einheit??'')}" onchange="updateItem(${sIdx},${iIdx},'einheit',this.value)"></td>
     <td><input class="cell-input num" type="text" inputmode="decimal" value="${it.ekStk??''}" onchange="updateItem(${sIdx},${iIdx},'ekStk',this.value)"></td>
@@ -563,9 +630,16 @@ function renderItem(sIdx,iIdx,it){
     <td class="td-calc font-semibold">${fmtEUR(c.vk)}</td>
     <td class="td-calc">${fmtEUR(c.db)}</td>
     <td class="td-calc">${fmtPct(c.dbPct)}</td>
-    <td><button class="btn btn-icon btn-ghost" onclick="deleteItem(${sIdx},${iIdx})" title="Löschen" style="margin:4px">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-    </button></td>
+    <td>
+      <div style="display:flex;justify-content:center;padding:4px">
+        <button class="btn btn-icon btn-ghost" onclick="duplicateItem(${sIdx},${iIdx})" title="Position duplizieren" style="width:22px;height:22px">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+        <button class="btn btn-icon btn-ghost" onclick="deleteItem(${sIdx},${iIdx})" title="Löschen" style="width:22px;height:22px">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </td>
   </tr>`;
 }
 
@@ -581,6 +655,17 @@ function deleteSection(idx){
   if (!confirm(`Bereich "${p.sections[idx].name}" wirklich löschen?`)) return;
   p.sections.splice(idx,1); save(); renderKalk();
 }
+function duplicateSection(idx){
+  const p = getActiveProject();
+  const orig = p.sections[idx];
+  const copy = JSON.parse(JSON.stringify(orig));
+  copy.id = uid();
+  copy.name = orig.name + ' (Kopie)';
+  copy.items = copy.items.map(it => ({...it, id: uid()}));
+  p.sections.splice(idx+1, 0, copy);
+  save(); renderKalk();
+  toast('Bereich dupliziert');
+}
 function updateSection(idx,field,val){
   getActiveProject().sections[idx][field] = val; save(); renderKalk();
 }
@@ -591,9 +676,17 @@ function addItem(sIdx){
 function deleteItem(sIdx,iIdx){
   getActiveProject().sections[sIdx].items.splice(iIdx,1); save(); renderKalk();
 }
+function duplicateItem(sIdx,iIdx){
+  const items = getActiveProject().sections[sIdx].items;
+  const copy = {...items[iIdx], id: uid()};
+  items.splice(iIdx+1, 0, copy);
+  save(); renderKalk();
+  toast('Position dupliziert');
+}
 function updateItem(sIdx,iIdx,field,val){
   const p = getActiveProject();
   if (['anzahl','ekStk','stunden','ekH','aufschlag'].includes(field)) val = parseNum(val);
+  if (field === 'name' && val === '') val = 'Position';
   p.sections[sIdx].items[iIdx][field] = val;
   save(); renderKalk();
 }
@@ -620,28 +713,63 @@ function newProject(){
 function editProject(){
   const p = getActiveProject();
   showModal(`
-    <div class="modal-header"><div class="modal-title">Projekt bearbeiten</div>
-      <button class="btn btn-icon btn-ghost" onclick="closeModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <div class="modal-header">
+      <div class="modal-title">Projekt bearbeiten</div>
+      <button class="btn btn-icon btn-ghost" onclick="closeModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
     </div>
     <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-group full"><label class="form-label">Projektname</label><input class="input" id="pe-name" value="${esc(p.name)}"></div>
-        <div class="form-group"><label class="form-label">Kunde</label><input class="input" id="pe-kunde" value="${esc(p.kunde)}"></div>
-        <div class="form-group"><label class="form-label">kWp</label><input class="input" id="pe-kwp" type="text" inputmode="decimal" value="${p.kwp}"></div>
-        <div class="form-group full"><label class="form-label">Adresse</label><input class="input" id="pe-adresse" value="${esc(p.adresse)}"></div>
+      <div class="form-section">
+        <div class="form-section-title">Projekt</div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Projektname <span class="required">*</span></label>
+          <input class="input" id="pe-name" value="${esc(p.name)}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kunde</label>
+          <input class="input" id="pe-kunde" value="${esc(p.kunde)}" placeholder="z.B. Familie Hasenöhrl">
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Technische Daten</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Anlagengröße</label>
+            <div class="input-group has-suffix">
+              <input class="input" id="pe-kwp" type="text" inputmode="decimal" value="${p.kwp}" placeholder="0">
+              <span class="input-suffix">kWp</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Datum</label>
+            <input class="input" id="pe-datum" type="date" value="${p.datum || ''}">
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Adresse</div>
+        <div class="form-group">
+          <input class="input" id="pe-adresse" value="${esc(p.adresse)}" placeholder="Straße, PLZ Ort">
+        </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger btn-sm" onclick="deleteProject()">Löschen</button>
-      <div class="right"><button class="btn" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveProjectEdit()">Speichern</button></div>
-    </div>`);
+      <button class="btn btn-danger btn-sm" onclick="deleteProject()">Projekt löschen</button>
+      <div class="right">
+        <button class="btn" onclick="closeModal()">Abbrechen</button>
+        <button class="btn btn-primary" onclick="saveProjectEdit()">Speichern</button>
+      </div>
+    </div>
+  `, 'modal-wide');
 }
 function saveProjectEdit(){
   const p = getActiveProject();
-  p.name = document.getElementById('pe-name').value.trim();
+  p.name = document.getElementById('pe-name').value.trim() || 'Unbenannt';
   p.kunde = document.getElementById('pe-kunde').value.trim();
   p.adresse = document.getElementById('pe-adresse').value.trim();
   p.kwp = parseNum(document.getElementById('pe-kwp').value);
+  p.datum = document.getElementById('pe-datum').value;
   save(); closeModal(); renderKalk();
   toast('Projekt gespeichert');
 }
@@ -659,7 +787,11 @@ function renderArtikel(){
   page.innerHTML = `
     <div class="page-header">
       <div><div class="page-title">Artikel</div><div class="page-subtitle">Stammdaten für Module, Wechselrichter, Speicher und mehr</div></div>
-      <div class="header-actions"><button class="btn btn-primary" onclick="newArticle()">+ Neuer Artikel</button></div>
+      <div class="header-actions">
+        <button class="btn" onclick="exportArticlesCSV()">CSV Export</button>
+        <button class="btn" onclick="importArticlesCSV()">CSV Import</button>
+        <button class="btn btn-primary" onclick="newArticle()">+ Neuer Artikel</button>
+      </div>
     </div>
     <div class="stats">
       <div class="stat"><div class="stat-label">Artikel gesamt</div><div class="stat-value">${state.articles.length}</div></div>
@@ -667,7 +799,7 @@ function renderArtikel(){
     <div class="toolbar">
       <div class="search-wrap">
         <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input class="input search-input" id="article-search" placeholder="Artikel suchen..." oninput="filterArticles()">
+        <input class="input search-input" id="article-search" placeholder="Suchen..." oninput="filterArticles()">
       </div>
       <select class="select" id="article-filter" onchange="filterArticles()" style="max-width:200px">
         <option value="">Alle Kategorien</option>
@@ -676,22 +808,31 @@ function renderArtikel(){
       </select>
     </div>
     <div class="table-wrap">
-      <table class="table">
+      <table class="table" id="articles-table">
         <thead><tr>
-          <th>Name</th><th>Hersteller</th><th>Kategorie</th><th>Einheit</th>
-          <th class="th-num">EK</th><th style="width:80px"></th>
+          <th style="width:30%">Name</th>
+          <th style="width:15%">Hersteller</th>
+          <th style="width:15%">Kategorie</th>
+          <th style="width:80px">Einheit</th>
+          <th class="th-num" style="width:100px">EK</th>
+          <th>Notiz</th>
+          <th style="width:60px"></th>
         </tr></thead>
         <tbody id="articles-tbody"></tbody>
       </table>
       <div id="articles-empty" class="empty" hidden>
         <svg class="empty-icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
         <div class="empty-title">Noch keine Artikel</div>
-        <div class="empty-desc">Lege deinen ersten Artikel an.</div>
-        <button class="btn btn-primary" onclick="newArticle()">+ Artikel anlegen</button>
+        <div class="empty-desc">Lege deinen ersten Artikel an oder importiere eine CSV.</div>
+        <div style="display:flex;gap:8px;justify-content:center">
+          <button class="btn" onclick="importArticlesCSV()">CSV Import</button>
+          <button class="btn btn-primary" onclick="newArticle()">+ Artikel anlegen</button>
+        </div>
       </div>
     </div>`;
   filterArticles();
 }
+
 function filterArticles(){
   const s = (document.getElementById('article-search')?.value || '').toLowerCase();
   const f = document.getElementById('article-filter')?.value || '';
@@ -705,81 +846,176 @@ function filterArticles(){
   if (!tbody) return;
   if (filtered.length === 0){ tbody.innerHTML = ''; if (empty) empty.hidden = false; return; }
   if (empty) empty.hidden = true;
-  tbody.innerHTML = filtered.map(a => `
-    <tr>
-      <td><div class="font-medium">${esc(a.name)}</div>${a.notizen?`<div class="text-sm text-muted" style="margin-top:2px">${esc(a.notizen)}</div>`:''}</td>
-      <td>${esc(a.hersteller||'–')}</td>
-      <td><span class="badge">${esc(a.kategorie||'Sonstiges')}</span></td>
-      <td>${esc(a.einheit||'Stk.')}</td>
-      <td class="td-num font-semibold">${fmtEUR(a.ek)}</td>
-      <td>
-        <button class="btn btn-icon btn-ghost" onclick="editArticle('${a.id}')" title="Bearbeiten">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-        </button>
-        <button class="btn btn-icon btn-ghost btn-danger" onclick="deleteArticle('${a.id}')" title="Löschen">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        </button>
-      </td>
-    </tr>`).join('');
+  tbody.innerHTML = filtered.map(a => renderArticleRow(a)).join('');
 }
-function newArticle(){ editArticleForm(null); }
-function editArticle(id){ editArticleForm(state.articles.find(a=>a.id===id)); }
-function editArticleForm(article){
-  const isEdit = !!article;
-  const d = article || { name:'', hersteller:'', kategorie:'Modul', einheit:'Stk.', ek:0, notizen:'' };
-  showModal(`
-    <div class="modal-header"><div class="modal-title">${isEdit?'Artikel bearbeiten':'Neuer Artikel'}</div>
-      <button class="btn btn-icon btn-ghost" onclick="closeModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-    </div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-group full"><label class="form-label">Name *</label><input class="input" id="ae-name" value="${esc(d.name)}" placeholder="z.B. JA Solar JKM460N-54HL4R"></div>
-        <div class="form-group"><label class="form-label">Hersteller</label><input class="input" id="ae-hersteller" value="${esc(d.hersteller)}" placeholder="z.B. JA Solar"></div>
-        <div class="form-group"><label class="form-label">Kategorie</label>
-          <select class="select" id="ae-kategorie">
-            ${['Modul','Wechselrichter','Speicher','Kabel','Montage','Elektro','Sonstiges'].map(c=>`<option ${d.kategorie===c?'selected':''}>${c}</option>`).join('')}
-          </select>
-        </div>
-        <div class="form-group"><label class="form-label">Einheit</label><input class="input" id="ae-einheit" value="${esc(d.einheit||'Stk.')}" placeholder="Stk., m, kg..."></div>
-        <div class="form-group"><label class="form-label">EK Preis *</label><input class="input" id="ae-ek" type="text" inputmode="decimal" value="${d.ek||''}" placeholder="0,00"></div>
-        <div class="form-group full"><label class="form-label">Notizen</label><input class="input" id="ae-notizen" value="${esc(d.notizen||'')}" placeholder="Optional"></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal()">Abbrechen</button>
-      <button class="btn btn-primary" onclick="saveArticle(${isEdit?`'${article.id}'`:'null'})">${isEdit?'Speichern':'Anlegen'}</button>
-    </div>`);
-  setTimeout(()=>document.getElementById('ae-name').focus(), 50);
+
+function renderArticleRow(a){
+  const cats = ['Modul','Wechselrichter','Speicher','Kabel','Montage','Elektro','Sonstiges'];
+  return `<tr data-id="${a.id}">
+    <td class="ie-cell ${!a.name ? 'empty' : ''}" data-placeholder="Name">
+      <input class="ie-input text" value="${esc(a.name)}" onchange="updateArticleField('${a.id}','name',this.value)" onfocus="this.parentElement.classList.remove('empty')">
+    </td>
+    <td class="ie-cell ${!a.hersteller ? 'empty' : ''}" data-placeholder="–">
+      <input class="ie-input text" value="${esc(a.hersteller||'')}" onchange="updateArticleField('${a.id}','hersteller',this.value)">
+    </td>
+    <td>
+      <select class="ie-select" onchange="updateArticleField('${a.id}','kategorie',this.value)" style="padding:8px 12px">
+        ${cats.map(c => `<option ${a.kategorie===c?'selected':''}>${c}</option>`).join('')}
+      </select>
+    </td>
+    <td class="ie-cell ${!a.einheit ? 'empty' : ''}" data-placeholder="Stk.">
+      <input class="ie-input text" value="${esc(a.einheit||'')}" onchange="updateArticleField('${a.id}','einheit',this.value)">
+    </td>
+    <td class="ie-cell ${!a.ek ? 'empty' : ''}" data-placeholder="0,00">
+      <input class="ie-input num" type="text" inputmode="decimal" value="${a.ek||''}" onchange="updateArticleField('${a.id}','ek',this.value)">
+    </td>
+    <td class="ie-cell ${!a.notizen ? 'empty' : ''}" data-placeholder="–">
+      <input class="ie-input text" value="${esc(a.notizen||'')}" onchange="updateArticleField('${a.id}','notizen',this.value)">
+    </td>
+    <td style="padding:6px">
+      <button class="btn btn-icon btn-ghost btn-danger" onclick="deleteArticle('${a.id}')" title="Löschen" style="width:24px;height:24px;margin:0">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+    </td>
+  </tr>`;
 }
-function saveArticle(id){
-  const name = document.getElementById('ae-name').value.trim();
-  if (!name){ toast('Name ist erforderlich','error'); return; }
-  const data = {
-    name,
-    hersteller: document.getElementById('ae-hersteller').value.trim(),
-    kategorie: document.getElementById('ae-kategorie').value,
-    einheit: document.getElementById('ae-einheit').value.trim(),
-    ek: parseNum(document.getElementById('ae-ek').value),
-    notizen: document.getElementById('ae-notizen').value.trim()
-  };
-  if (id){
-    Object.assign(state.articles.find(a=>a.id===id), data);
-    toast('Artikel aktualisiert');
-  } else {
-    state.articles.push({ id:uid(), ...data });
-    toast('Artikel angelegt');
+
+function updateArticleField(id, field, val){
+  const a = state.articles.find(x => x.id === id);
+  if (!a) return;
+  if (field === 'ek') val = parseNum(val);
+  a[field] = val;
+  save();
+  // nur die betroffene Zeile updaten, nicht alles neu rendern
+  const row = document.querySelector(`tr[data-id="${id}"]`);
+  if (row && field !== 'name' && field !== 'kategorie'){
+    const cell = row.querySelectorAll('.ie-cell');
+    const fieldToCell = { hersteller: 1, einheit: 3, ek: 4, notizen: 5 };
+    if (fieldToCell[field] !== undefined){
+      const c = cell[fieldToCell[field] - 1] || cell[fieldToCell[field]];
+      if (c) c.classList.toggle('empty', !val && val !== 0);
+    }
   }
-  save(); closeModal(); renderArtikel();
 }
+
+function newArticle(){
+  const a = { id: uid(), name:'', hersteller:'', kategorie:'Modul', einheit:'Stk.', ek:0, notizen:'' };
+  state.articles.unshift(a);
+  save();
+  filterArticles();
+  setTimeout(() => {
+    const row = document.querySelector(`tr[data-id="${a.id}"]`);
+    if (row) row.querySelector('input')?.focus();
+  }, 50);
+}
+
 function deleteArticle(id){
   const a = state.articles.find(x=>x.id===id);
-  if (!confirm(`Artikel "${a.name}" löschen?`)) return;
+  if (!confirm(`Artikel "${a.name || '(unbenannt)'}" löschen?`)) return;
   state.articles = state.articles.filter(x=>x.id!==id);
   save(); renderArtikel();
   toast('Artikel gelöscht');
 }
 
-// ============ CATALOG PICKER ============
+// ============ CSV IMPORT/EXPORT ============
+function exportArticlesCSV(){
+  const cats = ['Modul','Wechselrichter','Speicher','Kabel','Montage','Elektro','Sonstiges'];
+  const headers = ['Name','Hersteller','Kategorie','Einheit','EK','Notizen'];
+  const escape = v => {
+    const s = String(v ?? '');
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+  };
+  const rows = state.articles.map(a => [a.name,a.hersteller,a.kategorie,a.einheit,a.ek,a.notizen].map(escape).join(','));
+  const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `artikel-${new Date().toISOString().slice(0,10)}.csv`;
+  link.click();
+  toast('CSV heruntergeladen');
+}
+
+function importArticlesCSV(){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.csv,text/csv';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const text = ev.target.result.replace(/^\uFEFF/,'');
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length < 2) throw new Error('CSV leer oder nur Header');
+        const rows = parseCSV(lines);
+        const headers = rows[0].map(h => h.toLowerCase().trim());
+        const idx = {
+          name: headers.findIndex(h => h.includes('name') || h.includes('artikel') || h.includes('bezeichnung')),
+          hersteller: headers.findIndex(h => h.includes('hersteller') || h.includes('manufacturer')),
+          kategorie: headers.findIndex(h => h.includes('kategorie') || h.includes('category') || h.includes('cat')),
+          einheit: headers.findIndex(h => h.includes('einheit') || h.includes('unit') || h.includes('einh')),
+          ek: headers.findIndex(h => h.includes('ek') || h.includes('preis') || h.includes('price') || h.includes('cost')),
+          notizen: headers.findIndex(h => h.includes('notiz') || h.includes('note') || h.includes('beschreibung'))
+        };
+        if (idx.name === -1) throw new Error('Spalte "Name" nicht gefunden');
+        const cats = ['Modul','Wechselrichter','Speicher','Kabel','Montage','Elektro','Sonstiges'];
+        let added = 0, updated = 0;
+        rows.slice(1).forEach(row => {
+          const name = (row[idx.name] || '').trim();
+          if (!name) return;
+          const ek = parseNum(row[idx.ek] || 0);
+          const existing = state.articles.find(a => a.name.toLowerCase() === name.toLowerCase());
+          const data = {
+            hersteller: (row[idx.hersteller] || '').trim(),
+            kategorie: cats.includes(row[idx.kategorie]) ? row[idx.kategorie] : 'Sonstiges',
+            einheit: (row[idx.einheit] || 'Stk.').trim(),
+            ek,
+            notizen: (row[idx.notizen] || '').trim()
+          };
+          if (existing){
+            Object.assign(existing, data);
+            updated++;
+          } else {
+            state.articles.push({ id: uid(), name, ...data });
+            added++;
+          }
+        });
+        save(); renderArtikel();
+        toast(`${added} hinzugefügt, ${updated} aktualisiert`);
+      } catch (err){
+        toast('Fehler: ' + err.message, 'error');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function parseCSV(lines){
+  const rows = [];
+  for (const line of lines){
+    const row = [];
+    let cur = '', inQuotes = false;
+    for (let i = 0; i < line.length; i++){
+      const c = line[i];
+      if (inQuotes){
+        if (c === '"' && line[i+1] === '"'){ cur += '"'; i++; }
+        else if (c === '"'){ inQuotes = false; }
+        else cur += c;
+      } else {
+        if (c === '"') inQuotes = true;
+        else if (c === ','){ row.push(cur); cur = ''; }
+        else cur += c;
+      }
+    }
+    row.push(cur);
+    rows.push(row);
+  }
+  return rows;
+}
+
+// ============ KATALOG-PICKER (Modal-Version) ============
 function openCatalogPicker(sIdx){
   if (state.articles.length === 0){
     showModal(`
@@ -793,7 +1029,7 @@ function openCatalogPicker(sIdx){
     return;
   }
   showModal(`
-    <div class="modal-header"><div class="modal-title">Artikel auswählen</div>
+    <div class="modal-header"><div class="modal-title">Artikel aus Katalog</div>
       <button class="btn btn-icon btn-ghost" onclick="closeModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
     <div class="modal-body">
@@ -804,6 +1040,7 @@ function openCatalogPicker(sIdx){
   filterPicker(sIdx);
   setTimeout(()=>document.getElementById('picker-search').focus(), 50);
 }
+
 function filterPicker(sIdx){
   const s = (document.getElementById('picker-search')?.value || '').toLowerCase();
   const filtered = state.articles.filter(a => !s || `${a.name} ${a.hersteller} ${a.kategorie}`.toLowerCase().includes(s));
@@ -819,6 +1056,7 @@ function filterPicker(sIdx){
       <div class="td-num font-semibold" style="white-space:nowrap">${fmtEUR(a.ek)} <span class="text-muted text-sm">/ ${esc(a.einheit||'Stk.')}</span></div>
     </div>`).join('');
 }
+
 function pickArticle(sIdx,articleId){
   const a = state.articles.find(x=>x.id===articleId);
   getActiveProject().sections[sIdx].items.push({
@@ -827,6 +1065,109 @@ function pickArticle(sIdx,articleId){
   });
   save(); closeModal(); renderKalk();
   toast(`"${a.name}" hinzugefügt`);
+}
+
+// ============ KATALOG-POPOVER (Inline) ============
+let kpopState = null;
+
+function openKpop(sIdx, iIdx, anchorEl){
+  closeKpop();
+  const rect = anchorEl.getBoundingClientRect();
+  const top = rect.bottom + 6;
+  const left = Math.min(rect.left, window.innerWidth - 400);
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'kpop-backdrop';
+  backdrop.onclick = closeKpop;
+
+  const pop = document.createElement('div');
+  pop.className = 'kpop';
+  pop.style.top = top + 'px';
+  pop.style.left = left + 'px';
+  pop.innerHTML = `
+    <div class="kpop-search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="kpop-input" placeholder="Artikel suchen..." autocomplete="off">
+    </div>
+    <div class="kpop-list" id="kpop-list"></div>
+    <div class="kpop-footer">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> navigieren · <kbd>↵</kbd> auswählen</span>
+      <span><kbd>Esc</kbd></span>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  document.body.appendChild(pop);
+  const input = pop.querySelector('#kpop-input');
+  input.focus();
+
+  kpopState = { sIdx, iIdx, activeIdx: 0, filtered: [] };
+
+  const renderList = () => {
+    const q = input.value.toLowerCase();
+    kpopState.filtered = state.articles.filter(a => !q || `${a.name} ${a.hersteller} ${a.kategorie}`.toLowerCase().includes(q));
+    if (kpopState.activeIdx >= kpopState.filtered.length) kpopState.activeIdx = 0;
+    const list = pop.querySelector('#kpop-list');
+    if (kpopState.filtered.length === 0){
+      list.innerHTML = `
+        <div class="kpop-empty">
+          ${state.articles.length === 0 ? 'Kein Artikel im Katalog' : 'Keine Treffer'}
+          ${state.articles.length === 0 ? '<br><br><button class="btn btn-sm btn-primary" onclick="closeKpop();state.activeTab=\\'artikel\\';render()">Artikel anlegen</button>' : ''}
+        </div>`;
+      return;
+    }
+    list.innerHTML = kpopState.filtered.map((a, idx) => `
+      <div class="kpop-item ${idx === kpopState.activeIdx ? 'active' : ''}" data-idx="${idx}" onclick="kpopPick(${idx})">
+        <div class="kpop-item-main">
+          <div class="kpop-item-name">${esc(a.name)}</div>
+          <div class="kpop-item-sub">${esc(a.hersteller || '–')} · ${esc(a.kategorie)}</div>
+        </div>
+        <div class="kpop-item-price">${fmtEUR(a.ek)}<span class="text-muted text-sm" style="font-weight:400">/${esc(a.einheit || 'Stk.')}</span></div>
+      </div>
+    `).join('');
+    const activeEl = list.querySelector('.kpop-item.active');
+    if (activeEl) activeEl.scrollIntoView({ block: 'nearest' });
+  };
+
+  window.kpopPick = (idx) => {
+    const a = kpopState.filtered[idx];
+    if (!a) return;
+    const project = getActiveProject();
+    const item = project.sections[kpopState.sIdx].items[kpopState.iIdx];
+    item.articleId = a.id;
+    item.name = a.name;
+    item.einheit = a.einheit || item.einheit;
+    item.ekStk = a.ek;
+    if (!item.aufschlag) item.aufschlag = 30;
+    save();
+    closeKpop();
+    renderKalk();
+    toast(`"${a.name}" zugeordnet`);
+  };
+
+  input.addEventListener('input', () => { kpopState.activeIdx = 0; renderList(); });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown'){
+      e.preventDefault();
+      kpopState.activeIdx = Math.min(kpopState.activeIdx + 1, kpopState.filtered.length - 1);
+      renderList();
+    } else if (e.key === 'ArrowUp'){
+      e.preventDefault();
+      kpopState.activeIdx = Math.max(kpopState.activeIdx - 1, 0);
+      renderList();
+    } else if (e.key === 'Enter'){
+      e.preventDefault();
+      window.kpopPick(kpopState.activeIdx);
+    } else if (e.key === 'Escape'){
+      e.preventDefault();
+      closeKpop();
+    }
+  });
+  renderList();
+}
+
+function closeKpop(){
+  document.querySelectorAll('.kpop, .kpop-backdrop').forEach(el => el.remove());
+  kpopState = null;
 }
 
 // ============ PROJEKTE PAGE ============
@@ -871,7 +1212,7 @@ function selectProject(id){
   state.activeProjectId = id; state.activeTab = 'kalk'; save(); render();
 }
 
-// ============ BACKUP EXPORT / IMPORT ============
+// ============ BACKUP ============
 function exportData(){
   const blob = new Blob([JSON.stringify({
     articles: state.articles,
@@ -908,17 +1249,15 @@ function importData(){
         }
         save(); render();
         toast('Daten importiert');
-      } catch (err) {
-        toast('Fehler: ' + err.message, 'error');
-      }
+      } catch (err) { toast('Fehler: ' + err.message, 'error'); }
     };
     reader.readAsText(file);
   };
   input.click();
 }
 function resetAll(){
-  if (!confirm('Wirklich ALLE Daten löschen (Artikel + Projekte)?')) return;
-  if (!confirm('Wirklich sicher? Die Cloud-Verbindung wird ebenfalls getrennt.')) return;
+  if (!confirm('Wirklich ALLE Daten löschen?')) return;
+  if (!confirm('Wirklich sicher? Cloud-Verbindung wird ebenfalls getrennt.')) return;
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(JSONBIN_BIN_ID_KEY);
   JSONBIN_BIN_ID = '';
@@ -927,9 +1266,103 @@ function resetAll(){
   toast('Alles zurückgesetzt');
 }
 
+// ============ COMMAND PALETTE ============
+function openCmdk(){
+  const backdrop = document.createElement('div');
+  backdrop.className = 'cmdk-backdrop';
+  backdrop.onclick = closeCmdk;
+  backdrop.innerHTML = `
+    <div class="cmdk">
+      <div class="cmdk-input-wrap">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="cmdk-input" id="cmdk-input" placeholder="Suche nach Artikeln, Projekten…" autocomplete="off">
+      </div>
+      <div class="cmdk-results" id="cmdk-results"></div>
+      <div class="cmdk-hint">
+        <span><kbd>↑</kbd> <kbd>↓</kbd> navigieren · <kbd>↵</kbd> öffnen</span>
+        <span><kbd>Esc</kbd> schließen</span>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  setTimeout(() => document.getElementById('cmdk-input').focus(), 50);
+
+  let activeIdx = 0;
+  let results = [];
+
+  const render = () => {
+    const q = document.getElementById('cmdk-input').value.toLowerCase();
+    const articleHits = state.articles.filter(a => !q || `${a.name} ${a.hersteller}`.toLowerCase().includes(q)).slice(0, 6);
+    const projectHits = state.projects.filter(p => !q || `${p.name} ${p.kunde}`.toLowerCase().includes(q));
+    results = [
+      ...projectHits.map(p => ({ type:'project', id:p.id, name:p.name, sub:p.kunde || 'Projekt', icon:'folder' })),
+      ...articleHits.map(a => ({ type:'article', id:a.id, name:a.name, sub:`${a.hersteller||''} ${a.kategorie}`.trim(), price:fmtEUR(a.ek), icon:'package' }))
+    ];
+    if (results.length === 0){
+      document.getElementById('cmdk-results').innerHTML = '<div class="cmdk-empty" style="padding:30px;text-align:center;color:var(--text-muted);font-size:13px">Keine Treffer</div>';
+      return;
+    }
+    if (activeIdx >= results.length) activeIdx = 0;
+    let html = '';
+    if (projectHits.length > 0) html += '<div class="cmdk-group">Projekte</div>';
+    let i = 0;
+    projectHits.forEach(p => {
+      html += renderItem(results[i], i);
+      i++;
+    });
+    if (articleHits.length > 0) html += '<div class="cmdk-group">Artikel</div>';
+    articleHits.forEach(a => {
+      html += renderItem(results[i], i);
+      i++;
+    });
+    document.getElementById('cmdk-results').innerHTML = html;
+    const activeEl = document.querySelector('.cmdk-item.active');
+    if (activeEl) activeEl.scrollIntoView({ block: 'nearest' });
+  };
+
+  const renderItem = (r, i) => {
+    const icons = {
+      folder: '<svg class="cmdk-item-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
+      package: '<svg class="cmdk-item-icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>'
+    };
+    return `<div class="cmdk-item ${i === activeIdx ? 'active' : ''}" data-idx="${i}" onclick="cmdkPick(${i})">
+      ${icons[r.icon]}
+      <div class="cmdk-item-main">
+        <div class="cmdk-item-name">${esc(r.name)}</div>
+        <div class="cmdk-item-sub">${esc(r.sub)}</div>
+      </div>
+      ${r.price ? `<div class="font-semibold text-sm">${r.price}</div>` : ''}
+    </div>`;
+  };
+
+  window.cmdkPick = (i) => {
+    const r = results[i];
+    if (!r) return;
+    if (r.type === 'project'){ state.activeProjectId = r.id; state.activeTab = 'kalk'; save(); render(); }
+    else if (r.type === 'article'){ state.activeTab = 'artikel'; render(); }
+    closeCmdk();
+  };
+
+  document.getElementById('cmdk-input').addEventListener('input', () => { activeIdx = 0; render(); });
+  document.getElementById('cmdk-input').addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown'){ e.preventDefault(); activeIdx = Math.min(activeIdx + 1, results.length - 1); render(); }
+    else if (e.key === 'ArrowUp'){ e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); render(); }
+    else if (e.key === 'Enter'){ e.preventDefault(); window.cmdkPick(activeIdx); }
+    else if (e.key === 'Escape'){ closeCmdk(); }
+  });
+  render();
+}
+
+function closeCmdk(){
+  document.querySelectorAll('.cmdk-backdrop').forEach(el => el.remove());
+}
+
 // ============ MODAL & TOAST ============
-function showModal(html){
-  document.getElementById('modal-root').innerHTML = `<div class="modal-backdrop" onclick="if(event.target===this)closeModal()">${html}</div>`;
+function showModal(html, size = ''){
+  document.getElementById('modal-root').innerHTML =
+    `<div class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+      <div class="modal ${size}">${html}</div>
+    </div>`;
 }
 function closeModal(){ document.getElementById('modal-root').innerHTML = ''; }
 function toast(msg, type=''){
@@ -940,15 +1373,13 @@ function toast(msg, type=''){
   c.appendChild(el);
   setTimeout(()=>el.remove(), 2200);
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-async function manualSync(){
-  if (!isCloudConfigured()){ toast('API-Key nicht gesetzt', 'error'); return; }
-  toast('Synchronisiere…');
-  await cloudSave();
-}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){ closeModal(); closeKpop(); closeCmdk(); }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k'){ e.preventDefault(); openCmdk(); }
+});
 
-// ============ SEED (leer starten) ============
+// ============ SEED ============
 function seed(){
   state.projects = [{
     id: uid(),
