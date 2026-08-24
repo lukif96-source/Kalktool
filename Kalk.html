@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalk</title>
+<style>
+:root{
+  --bg:#fff;--bg-soft:#fafafa;--bg-muted:#f5f5f5;
+  --border:#ececec;--border-strong:#d4d4d4;
+  --text:#0a0a0a;--text-soft:#525252;--text-muted:#a3a3a3;
+  --accent:#2563eb;--accent-soft:#eff6ff;
+  --success:#16a34a;--success-soft:#f0fdf4;
+  --danger:#dc2626;--danger-soft:#fef2f2;
+  --warning:#ea580c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;
+  background:var(--bg-soft);color:var(--text);font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+
+/* ===== Sidebar ===== */
+.sidebar{background:var(--bg);border-right:1px solid var(--border);padding:20px 16px;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 10px;margin-bottom:28px;font-weight:600;font-size:15px;letter-spacing:-0.01em}
+.brand-logo{width:28px;height:28px;background:var(--text);color:var(--bg);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.nav-section{margin-bottom:24px}
+.nav-section.push-bottom{margin-top:auto}
+.nav-title{font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;padding:0 12px;margin-bottom:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:6px;color:var(--text-soft);font-size:13px;width:100%;text-align:left;margin-bottom:1px;transition:all 0.1s}
+.nav-item:hover{background:var(--bg-muted);color:var(--text)}
+.nav-item.active{background:var(--bg-muted);color:var(--text);font-weight:500}
+.nav-icon{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ===== Main ===== */
+.main{padding:32px 40px 80px;max-width:1400px}
+.page-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;gap:16px;flex-wrap:wrap}
+.page-title{font-size:22px;font-weight:600;letter-spacing:-0.02em}
+.page-subtitle{color:var(--text-soft);font-size:13px;margin-top:3px}
+.header-actions{display:flex;gap:8px;align-items:center}
+
+/* ===== Buttons ===== */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:6px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text);font-size:13px;font-weight:500;transition:all 0.1s;white-space:nowrap}
+.btn:hover{background:var(--bg-muted)}
+.btn:active{transform:translateY(0.5px)}
+.btn-primary{background:var(--text);color:var(--bg);border-color:var(--text)}
+.btn-primary:hover{background:#000}
+.btn-icon{padding:6px;width:28px;height:28px;justify-content:center;border-color:transparent}
+.btn-icon:hover{background:var(--bg-muted);border-color:transparent}
+.btn-ghost{border-color:transparent;background:transparent;color:var(--text-soft)}
+.btn-ghost:hover{background:var(--bg-muted);color:var(--text);border-color:transparent}
+.btn-danger{color:var(--danger)}
+.btn-danger:hover{background:var(--danger-soft);border-color:transparent}
+.btn-sm{padding:5px 10px;font-size:12px}
+
+/* ===== Cards ===== */
+.card{background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.card-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.card-title{font-weight:600;font-size:14px}
+
+/* ===== Stats ===== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px}
+.stat{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.stat-label{font-size:12px;color:var(--text-soft);margin-bottom:6px}
+.stat-value{font-size:22px;font-weight:600;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
+.stat-delta{font-size:11px;color:var(--text-muted);margin-top:4px;font-variant-numeric:tabular-nums}
+
+/* ===== Toolbar ===== */
+.toolbar{display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
+.input,.select{padding:7px 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);font-size:13px;transition:border-color 0.1s,box-shadow 0.1s;width:100%}
+.input:focus,.select:focus{outline:none;border-color:var(--text);box-shadow:0 0 0 3px rgba(10,10,10,0.06)}
+.search-wrap{position:relative;flex:1;min-width:200px;max-width:340px}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-muted);stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.search-input{padding-left:32px}
+
+/* Inline cell inputs */
+.cell-input{padding:4px 6px;border:1px solid transparent;border-radius:4px;background:transparent;font-size:13px;width:100%;font-variant-numeric:tabular-nums}
+.cell-input.text{font-variant-numeric:normal;text-align:left}
+.cell-input.num{text-align:right}
+.cell-input:hover{background:var(--bg-muted)}
+.cell-input:focus{outline:none;background:var(--bg);border-color:var(--border-strong);box-shadow:0 0 0 2px rgba(10,10,10,0.04)}
+
+/* ===== Table ===== */
+.table-wrap{background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.table{width:100%;border-collapse:collapse;font-size:13px}
+.table th{text-align:left;padding:9px 12px;font-size:11px;font-weight:500;color:var(--text-muted);background:var(--bg-muted);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
+.table td{padding:0;border-bottom:1px solid var(--border);vertical-align:middle}
+.table tbody tr:last-child td{border-bottom:none}
+.table tbody tr:hover td{background:var(--bg-soft)}
+.table tfoot td{padding:10px 12px;background:var(--bg-muted);font-weight:600;border-top:1px solid var(--border-strong);font-variant-numeric:tabular-nums}
+.th-num{text-align:right}
+.td-num{text-align:right;font-variant-numeric:tabular-nums}
+.td-calc{background:var(--bg-muted);color:var(--text);font-variant-numeric:tabular-nums;padding:8px 12px;text-align:right}
+
+/* ===== Section ===== */
+.section{margin-bottom:14px}
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg);border:1px solid var(--border);border-radius:12px 12px 0 0;border-bottom:none}
+.section-header input{border:none;background:transparent;font-size:14px;font-weight:600;width:100%;padding:4px 0}
+.section-header input:focus{outline:none}
+.section-body{background:var(--bg);border:1px solid var(--border);border-radius:0 0 12px 12px;overflow:hidden}
+.section-table-scroll{overflow-x:auto}
+.section-table{min-width:1100px}
+.section-footer{padding:8px 16px;background:var(--bg);border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;display:flex;justify-content:space-between;align-items:center;margin-top:-1px}
+.add-section-btn{width:100%;justify-content:center;padding:10px;margin-top:14px}
+
+/* ===== Modal ===== */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;animation:fadeIn 0.15s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--bg);border-radius:12px;width:520px;max-width:100%;max-height:90vh;display:flex;flex-direction:column;animation:slideUp 0.2s;box-shadow:0 20px 50px rgba(0,0,0,0.15)}
+@keyframes slideUp{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-title{font-size:15px;font-weight:600}
+.modal-body{padding:20px;overflow-y:auto;flex:1}
+.modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:8px}
+.modal-footer .right{display:flex;gap:8px}
+
+/* ===== Form ===== */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:12px;font-weight:500;color:var(--text-soft);margin-bottom:5px}
+
+/* ===== Badge ===== */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;background:var(--bg-muted);color:var(--text-soft);white-space:nowrap}
+.badge-blue{background:var(--accent-soft);color:var(--accent)}
+.badge-success{background:var(--success-soft);color:var(--success)}
+
+/* ===== Empty ===== */
+.empty{padding:60px 20px;text-align:center}
+.empty-icon{width:40px;height:40px;margin:0 auto 14px;color:var(--text-muted);opacity:0.4;stroke:currentColor;fill:none;stroke-width:1.5}
+.empty-title{font-weight:500;margin-bottom:4px;font-size:14px}
+.empty-desc{color:var(--text-soft);font-size:13px;margin-bottom:16px}
+
+/* ===== Toast ===== */
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--text);color:var(--bg);padding:9px 14px;border-radius:8px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,0.2);animation:slideUp 0.2s;pointer-events:auto}
+.toast.error{background:var(--danger)}
+
+/* ===== Cloud Status ===== */
+.cloud-status{display:flex;gap:8px;align-items:center;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:500;background:var(--bg-muted);transition:all 0.2s}
+.cloud-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--text-muted);transition:all 0.2s}
+.cloud-idle   { color:var(--text-soft) }
+.cloud-idle   .cloud-dot { background:var(--text-muted) }
+.cloud-saving { color:var(--text); background:var(--accent-soft) }
+.cloud-saving .cloud-dot { background:var(--accent); animation:pulse 1s infinite }
+.cloud-saved  { color:var(--success); background:var(--success-soft) }
+.cloud-saved  .cloud-dot { background:var(--success) }
+.cloud-error  { color:var(--danger); background:var(--danger-soft) }
+.cloud-error  .cloud-dot { background:var(--danger) }
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.3)}}
+
+/* ===== Utilities ===== */
+.text-muted{color:var(--text-muted)}
+.text-soft{color:var(--text-soft)}
+.text-success{color:var(--success)}
+.text-danger{color:var(--danger)}
+.text-right{text-align:right}
+.text-sm{font-size:12px}
+.font-medium{font-weight:500}
+.font-semibold{font-weight:600}
+.mb-2{margin-bottom:8px}
+.mb-4{margin-bottom:16px}
+.mt-4{margin-top:16px}
+
+@media print{
+  .sidebar,.header-actions,.section-footer,.add-section-btn,.btn,.modal-backdrop,.toast-container{display:none!important}
+  .layout{grid-template-columns:1fr}
+  .main{padding:0;max-width:100%}
+  .card,.section{border:1px solid #ccc!important;box-shadow:none!important}
+  .table-wrap{border:none}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">K</div>
+      <span>Kalk</span>
+    </div>
+    <div class="nav-section">
+      <div class="nav-title">Arbeitsbereich</div>
+      <button class="nav-item active" data-tab="kalk">
+        <svg class="nav-icon" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/></svg>
+        Kalkulation
+      </button>
+      <button class="nav-item" data-tab="artikel">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
+        Artikel
+      </button>
+      <button class="nav-item" data-tab="projekte">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Projekte
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-title">Daten</div>
+      <button class="nav-item" onclick="exportData()">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        Backup exportieren
+      </button>
+      <button class="nav-item" onclick="importData()">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+        Backup importieren
+      </button>
+      <button class="nav-item" onclick="resetAll()" style="color:var(--danger)">
+        <svg class="nav-icon" viewBox="0 0 24 24" stroke="var(--danger)"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Alles zurücksetzen
+      </button>
+    </div>
+
+    <div class="nav-section push-bottom">
+      <div id="cloud-status" class="cloud-status cloud-idle">
+        <span class="cloud-dot"></span>
+        <span>Cloud wird geladen…</span>
+      </div>
+      <button class="nav-item" onclick="manualSync()" style="margin-top:6px">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+        Jetzt synchronisieren
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div id="page-kalk" class="page"></div>
+    <div id="page-artikel" class="page" hidden></div>
+    <div id="page-projekte" class="page" hidden></div>
+  </main>
+</div>
+<div id="modal-root"></div>
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ============ CLOUD CONFIG ============
+const JSONBIN_API_KEY = '$2a$10$vFZ6EvL8RNdkDHj754vI0u2i34wERCZUj8LvWOMcj.IIwTG3kMM9e';
+const JSONBIN_BIN_ID_KEY = 'kalk-jsonbin-id';
+let JSONBIN_BIN_ID = localStorage.getItem(JSONBIN_BIN_ID_KEY) || '';
+
+// ============ STATE ============
+const state = {
+  activeTab: 'kalk',
+  articles: [],
+  projects: [],
+  activeProjectId: null
+};
+const STORAGE_KEY = 'kalk-data-v1';
+
+// ============ UTILS ============
+const uid = () => Math.random().toString(36).slice(2, 10);
+const fmtEUR = n => (Number(n)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+const fmtPct = n => (Number(n)||0).toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1}) + ' %';
+const parseNum = s => {
+  if (typeof s === 'number') return s;
+  if (s == null || s === '') return 0;
+  const c = String(s).replace(/[^\d.,\-]/g,'').replace(',','.');
+  return parseFloat(c) || 0;
+};
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const getActiveProject = () => state.projects.find(p => p.id === state.activeProjectId);
+
+// ============ CLOUD SYNC ============
+let cloudSyncTimer = null;
+let cloudStatus = 'idle';
+let cloudInFlight = false;
+
+function headers(){
+  return { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY };
+}
+
+function isCloudConfigured(){
+  return JSONBIN_API_KEY && !JSONBIN_API_KEY.includes('DEIN');
+}
+
+async function ensureBin(){
+  if (JSONBIN_BIN_ID) return JSONBIN_BIN_ID;
+  // Erstelle neuen Bin
+  const r = await fetch('https://api.jsonbin.io/v3/b', {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify({
+      articles: state.articles,
+      projects: state.projects,
+      activeProjectId: state.activeProjectId,
+      createdAt: new Date().toISOString()
+    })
+  });
+  if (!r.ok) throw new Error(`Bin erstellen fehlgeschlagen: HTTP ${r.status}`);
+  const d = await r.json();
+  JSONBIN_BIN_ID = d.metadata.id;
+  localStorage.setItem(JSONBIN_BIN_ID_KEY, JSONBIN_BIN_ID);
+  return JSONBIN_BIN_ID;
+}
+
+async function cloudSave(){
+  if (!isCloudConfigured()) return;
+  if (cloudInFlight) { scheduleCloudSave(); return; }
+  cloudInFlight = true;
+  cloudStatus = 'saving';
+  updateCloudIndicator();
+  try {
+    const id = await ensureBin();
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${id}`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify({
+        articles: state.articles,
+        projects: state.projects,
+        activeProjectId: state.activeProjectId,
+        updatedAt: new Date().toISOString()
+      })
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    cloudStatus = 'saved';
+    updateCloudIndicator();
+    setTimeout(() => { if (cloudStatus === 'saved') { cloudStatus = 'idle'; updateCloudIndicator(); } }, 2000);
+  } catch (e){
+    console.error('Cloud save failed:', e);
+    cloudStatus = 'error';
+    updateCloudIndicator();
+  }
+  cloudInFlight = false;
+}
+
+async function cloudLoad(){
+  if (!isCloudConfigured()) return false;
+  if (!JSONBIN_BIN_ID) return false;
+  try {
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, { headers: headers() });
+    if (r.status === 404){ JSONBIN_BIN_ID = ''; localStorage.removeItem(JSONBIN_BIN_ID_KEY); return false; }
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    const data = d.record || d;
+    if (data && (data.articles || data.projects)){
+      state.articles = data.articles || [];
+      state.projects = data.projects || [];
+      state.activeProjectId = data.activeProjectId || null;
+      return true;
+    }
+  } catch (e){
+    console.warn('Cloud load failed:', e);
+  }
+  return false;
+}
+
+function scheduleCloudSave(){
+  if (!isCloudConfigured()) return;
+  cloudStatus = 'saving';
+  updateCloudIndicator();
+  if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(cloudSave, 2000);
+}
+
+function updateCloudIndicator(){
+  const el = document.getElementById('cloud-status');
+  if (!el) return;
+  const map = {
+    idle:   { cls: 'cloud-idle',   text: JSONBIN_BIN_ID ? 'Cloud verbunden' : 'Lokal (noch keine Cloud)' },
+    saving: { cls: 'cloud-saving', text: 'Speichert…' },
+    saved:  { cls: 'cloud-saved',  text: 'Gespeichert ✓' },
+    error:  { cls: 'cloud-error',  text: 'Sync-Fehler' }
+  };
+  const s = map[cloudStatus] || map.idle;
+  el.className = 'cloud-status ' + s.cls;
+  el.innerHTML = `<span class="cloud-dot"></span><span>${s.text}</span>`;
+}
+
+// ============ LOCAL STORAGE ============
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    articles: state.articles,
+    projects: state.projects,
+    activeProjectId: state.activeProjectId
+  }));
+  scheduleCloudSave();
+}
+
+function loadLocal(){
+  const r = localStorage.getItem(STORAGE_KEY);
+  if (!r) return false;
+  try {
+    const d = JSON.parse(r);
+    state.articles = d.articles || [];
+    state.projects = d.projects || [];
+    state.activeProjectId = d.activeProjectId || null;
+    return true;
+  } catch(e){ return false; }
+}
+
+async function load(){
+  // 1) Versuche Cloud (Multi-Device-Sync)
+  if (isCloudConfigured() && JSONBIN_BIN_ID){
+    const fromCloud = await cloudLoad();
+    if (fromCloud){
+      save(); // spiegele in localStorage
+      return true;
+    }
+  }
+  // 2) Fallback auf localStorage
+  return loadLocal();
+}
+
+// ============ CALC ============
+function calcItem(item){
+  const anzahl = Number(item.anzahl)||0;
+  const ekStk = Number(item.ekStk)||0;
+  const stunden = Number(item.stunden)||0;
+  const ekH = Number(item.ekH)||0;
+  const matEK = anzahl * ekStk;
+  const lohnEK = stunden * ekH;
+  const totalEK = matEK + lohnEK;
+  const auf = (Number(item.aufschlag)||0)/100;
+  const vk = totalEK * (1 + auf);
+  const db = vk - totalEK;
+  const dbPct = vk > 0 ? (db/vk)*100 : 0;
+  return { matEK, lohnEK, totalEK, vk, db, dbPct };
+}
+function calcSection(s){
+  let matEK=0, lohnEK=0, vk=0;
+  s.items.forEach(i => { const c = calcItem(i); matEK+=c.matEK; lohnEK+=c.lohnEK; vk+=c.vk; });
+  const totalEK = matEK + lohnEK;
+  const db = vk - totalEK;
+  const dbPct = vk > 0 ? (db/vk)*100 : 0;
+  return { matEK, lohnEK, totalEK, vk, db, dbPct };
+}
+function calcProject(p){
+  let matEK=0, lohnEK=0, vk=0;
+  p.sections.forEach(s => { const c = calcSection(s); matEK+=c.matEK; lohnEK+=c.lohnEK; vk+=c.vk; });
+  const totalEK = matEK + lohnEK;
+  const db = vk - totalEK;
+  const dbPct = vk > 0 ? (db/vk)*100 : 0;
+  return { matEK, lohnEK, totalEK, vk, db, dbPct };
+}
+
+// ============ RENDER ============
+function render(){
+  document.querySelectorAll('.page').forEach(p => p.hidden = true);
+  document.getElementById(`page-${state.activeTab}`).hidden = false;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === state.activeTab));
+  if (state.activeTab === 'kalk') renderKalk();
+  if (state.activeTab === 'artikel') renderArtikel();
+  if (state.activeTab === 'projekte') renderProjekte();
+}
+
+function renderKalk(){
+  const page = document.getElementById('page-kalk');
+  const project = getActiveProject();
+  if (!project){
+    page.innerHTML = `
+      <div class="page-header"><div><div class="page-title">Kalkulation</div><div class="page-subtitle">Erstelle dein erstes Projekt</div></div></div>
+      <div class="card"><div class="empty">
+        <svg class="empty-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <div class="empty-title">Noch kein Projekt</div>
+        <div class="empty-desc">Lege ein neues Projekt an, um zu starten.</div>
+        <button class="btn btn-primary" onclick="newProject()">+ Neues Projekt</button>
+      </div></div>`;
+    return;
+  }
+  const t = calcProject(project);
+  const itemCount = project.sections.reduce((s,x)=>s+x.items.length,0);
+  page.innerHTML = `
+    <div class="page-header">
+      <div>
+        <div class="page-title">${esc(project.name)}</div>
+        <div class="page-subtitle">${esc(project.kunde||'Kein Kunde')} · ${project.kwp} kWp · ${project.sections.length} Bereiche · ${itemCount} Positionen</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn" onclick="editProject()">Projekt bearbeiten</button>
+        <button class="btn" onclick="window.print()">Drucken</button>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Einkauf (EK)</div><div class="stat-value">${fmtEUR(t.totalEK)}</div><div class="stat-delta">Material ${fmtEUR(t.matEK)} · Lohn ${fmtEUR(t.lohnEK)}</div></div>
+      <div class="stat"><div class="stat-label">Verkauf (VK)</div><div class="stat-value">${fmtEUR(t.vk)}</div></div>
+      <div class="stat"><div class="stat-label">Deckungsbeitrag</div><div class="stat-value text-success">${fmtEUR(t.db)}</div></div>
+      <div class="stat"><div class="stat-label">DB Marge</div><div class="stat-value">${fmtPct(t.dbPct)}</div></div>
+    </div>
+    <div id="sections-list"></div>
+    <button class="btn add-section-btn" onclick="addSection()">+ Bereich hinzufügen</button>
+    <div class="card mt-4">
+      <div class="card-header"><div class="card-title">Zusammenfassung</div></div>
+      <table class="table">
+        <thead><tr><th>Bereich</th><th class="th-num">EK</th><th class="th-num">VK</th><th class="th-num">DB</th><th class="th-num">DB %</th></tr></thead>
+        <tbody>${project.sections.map(s => { const c = calcSection(s); return `<tr><td class="font-medium">${esc(s.name)}</td><td class="td-num">${fmtEUR(c.totalEK)}</td><td class="td-num">${fmtEUR(c.vk)}</td><td class="td-num text-success">${fmtEUR(c.db)}</td><td class="td-num">${fmtPct(c.dbPct)}</td></tr>`; }).join('')}</tbody>
+        <tfoot><tr><td>Gesamt</td><td class="td-num">${fmtEUR(t.totalEK)}</td><td class="td-num">${fmtEUR(t.vk)}</td><td class="td-num text-success">${fmtEUR(t.db)}</td><td class="td-num">${fmtPct(t.dbPct)}</td></tr></tfoot>
+      </table>
+    </div>`;
+  renderSections();
+}
+
+function renderSections(){
+  const c = document.getElementById('sections-list');
+  c.innerHTML = getActiveProject().sections.map((s,i) => renderSection(s,i)).join('');
+}
+function renderSection(s, sIdx){
+  const c = calcSection(s);
+  return `
+    <div class="section">
+      <div class="section-header">
+        <input type="text" value="${esc(s.name)}" onchange="updateSection(${sIdx},'name',this.value)">
+        <button class="btn btn-icon btn-ghost" onclick="deleteSection(${sIdx})" title="Bereich löschen">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
+      <div class="section-body">
+        <div class="section-table-scroll">
+          <table class="table section-table">
+            <thead><tr>
+              <th style="min-width:200px">Artikel</th>
+              <th class="th-num" style="width:60px">Anz.</th>
+              <th style="width:70px">Einh.</th>
+              <th class="th-num" style="width:80px">EK/Stk</th>
+              <th class="th-num" style="width:85px">Σ Mat</th>
+              <th class="th-num" style="width:55px">Std.</th>
+              <th class="th-num" style="width:70px">EK/h</th>
+              <th class="th-num" style="width:85px">Σ Lohn</th>
+              <th class="th-num" style="width:65px">Auf.%</th>
+              <th class="th-num" style="width:95px">VK</th>
+              <th class="th-num" style="width:85px">DB</th>
+              <th class="th-num" style="width:60px">DB %</th>
+              <th style="width:36px"></th>
+            </tr></thead>
+            <tbody>${s.items.map((it,iIdx)=>renderItem(sIdx,iIdx,it)).join('')}</tbody>
+            <tfoot><tr>
+              <td colspan="4" class="text-right">Summe ${esc(s.name)}</td>
+              <td class="td-num">${fmtEUR(c.matEK)}</td><td colspan="2"></td>
+              <td class="td-num">${fmtEUR(c.lohnEK)}</td><td></td>
+              <td class="td-num">${fmtEUR(c.vk)}</td>
+              <td class="td-num text-success">${fmtEUR(c.db)}</td>
+              <td class="td-num">${fmtPct(c.dbPct)}</td><td></td>
+            </tr></tfoot>
+          </table>
+        </div>
+      </div>
+      <div class="section-footer">
+        <button class="btn btn-sm" onclick="addItem(${sIdx})">+ Position</button>
+        <button class="btn btn-sm btn-ghost" onclick="openCatalogPicker(${sIdx})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
+          Aus Katalog
+        </button>
+      </div>
+    </div>`;
+}
+function renderItem(sIdx,iIdx,it){
+  const c = calcItem(it);
+  return `<tr>
+    <td><input class="cell-input text" type="text" value="${esc(it.name)}" onchange="updateItem(${sIdx},${iIdx},'name',this.value)"></td>
+    <td><input class="cell-input num" type="text" inputmode="decimal" value="${it.anzahl??''}" onchange="updateItem(${sIdx},${iIdx},'anzahl',this.value)"></td>
+    <td><input class="cell-input text" type="text" value="${esc(it.einheit??'')}" onchange="updateItem(${sIdx},${iIdx},'einheit',this.value)"></td>
+    <td><input class="cell-input num" type="text" inputmode="decimal" value="${it.ekStk??''}" onchange="updateItem(${sIdx},${iIdx},'ekStk',this.value)"></td>
+    <td class="td-calc">${fmtEUR(c.matEK)}</td>
+    <td><input class="cell-input num" type="text" inputmode="decimal" value="${it.stunden??''}" onchange="updateItem(${sIdx},${iIdx},'stunden',this.value)"></td>
+    <td><input class="cell-input num" type="text" inputmode="decimal" value="${it.ekH??''}" onchange="updateItem(${sIdx},${iIdx},'ekH',this.value)"></td>
+    <td class="td-calc">${fmtEUR(c.lohnEK)}</td>
+    <td><input class="cell-input num" type="text" inputmode="decimal" value="${it.aufschlag??''}" onchange="updateItem(${sIdx},${iIdx},'aufschlag',this.value)"></td>
+    <td class="td-calc font-semibold">${fmtEUR(c.vk)}</td>
+    <td class="td-calc">${fmtEUR(c.db)}</td>
+    <td class="td-calc">${fmtPct(c.dbPct)}</td>
+    <td><button class="btn btn-icon btn-ghost" onclick="deleteItem(${sIdx},${iIdx})" title="Löschen" style="margin:4px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button></td>
+  </tr>`;
+}
+
+// ============ KALK MUTATIONS ============
+function addSection(){
+  const name = prompt('Name des Bereichs:','Neuer Bereich');
+  if (!name) return;
+  getActiveProject().sections.push({ id: uid(), name, items: [] });
+  save(); renderKalk();
+}
+function deleteSection(idx){
+  const p = getActiveProject();
+  if (!confirm(`Bereich "${p.sections[idx].name}" wirklich löschen?`)) return;
+  p.sections.splice(idx,1); save(); renderKalk();
+}
+function updateSection(idx,field,val){
+  getActiveProject().sections[idx][field] = val; save(); renderKalk();
+}
+function addItem(sIdx){
+  getActiveProject().sections[sIdx].items.push({ id:uid(), name:'Neue Position', anzahl:1, einheit:'Stk.', ekStk:0, stunden:0, ekH:0, aufschlag:30 });
+  save(); renderKalk();
+}
+function deleteItem(sIdx,iIdx){
+  getActiveProject().sections[sIdx].items.splice(iIdx,1); save(); renderKalk();
+}
+function updateItem(sIdx,iIdx,field,val){
+  const p = getActiveProject();
+  if (['anzahl','ekStk','stunden','ekH','aufschlag'].includes(field)) val = parseNum(val);
+  p.sections[sIdx].items[iIdx][field] = val;
+  save(); renderKalk();
+}
+
+// ============ PROJEKTE ============
+function newProject(){
+  const name = prompt('Projektname:','Neues Projekt');
+  if (!name) return;
+  const project = {
+    id: uid(), name, kunde:'', adresse:'', kwp:10, datum:new Date().toISOString().slice(0,10),
+    sections: [
+      { id: uid(), name:'Module', items:[] },
+      { id: uid(), name:'DC-Montage', items:[] },
+      { id: uid(), name:'AC-Montage', items:[] },
+      { id: uid(), name:'Wechselrichter', items:[] },
+      { id: uid(), name:'Speicher', items:[] },
+      { id: uid(), name:'Abwicklung', items:[] }
+    ]
+  };
+  state.projects.push(project);
+  state.activeProjectId = project.id;
+  save(); render();
+}
+function editProject(){
+  const p = getActiveProject();
+  showModal(`
+    <div class="modal-header"><div class="modal-title">Projekt bearbeiten</div>
+      <button class="btn btn-icon btn-ghost" onclick="closeModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Projektname</label><input class="input" id="pe-name" value="${esc(p.name)}"></div>
+        <div class="form-group"><label class="form-label">Kunde</label><input class="input" id="pe-kunde" value="${esc(p.kunde)}"></div>
+        <div class="form-group"><label class="form-label">kWp</label><input class="input" id="pe-kwp" type="text" inputmode="decimal" value="${p.kwp}"></div>
+        <div class="form-group full"><label class="form-label">Adresse</label><input class="input" id="pe-adresse" value="${esc(p.adresse)}"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" onclick="deleteProject()">Löschen</button>
+      <div class="right"><button class="btn" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveProjectEdit()">Speichern</button></div>
+    </div>`);
+}
+function saveProjectEdit(){
+  const p = getActiveProject();
+  p.name = document.getElementById('pe-name').value.trim();
+  p.kunde = document.getElementById('pe-kunde').value.trim();
+  p.adresse = document.getElementById('pe-adresse').value.trim();
+  p.kwp = parseNum(document.getElementById('pe-kwp').value);
+  save(); closeModal(); renderKalk();
+  toast('Projekt gespeichert');
+}
+function deleteProject(){
+  const p = getActiveProject();
+  if (!confirm(`Projekt "${p.name}" wirklich löschen?`)) return;
+  state.projects = state.projects.filter(x => x.id !== p.id);
+  state.activeProjectId = state.projects[0]?.id || null;
+  save(); closeModal(); render();
+}
+
+// ============ ARTIKEL ============
+function renderArtikel(){
+  const page = document.getElementById('page-artikel');
+  page.innerHTML = `
+    <div class="page-header">
+      <div><div class="page-title">Artikel</div><div class="page-subtitle">Stammdaten für Module, Wechselrichter, Speicher und mehr</div></div>
+      <div class="header-actions"><button class="btn btn-primary" onclick="newArticle()">+ Neuer Artikel</button></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Artikel gesamt</div><div class="stat-value">${state.articles.length}</div></div>
+    </div>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="input search-input" id="article-search" placeholder="Artikel suchen..." oninput="filterArticles()">
+      </div>
+      <select class="select" id="article-filter" onchange="filterArticles()" style="max-width:200px">
+        <option value="">Alle Kategorien</option>
+        <option>Modul</option><option>Wechselrichter</option><option>Speicher</option>
+        <option>Kabel</option><option>Montage</option><option>Elektro</option><option>Sonstiges</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr>
+          <th>Name</th><th>Hersteller</th><th>Kategorie</th><th>Einheit</th>
+          <th class="th-num">EK</th><th style="width:80px"></th>
+        </tr></thead>
+        <tbody id="articles-tbody"></tbody>
+      </table>
+      <div id="articles-empty" class="empty" hidden>
+        <svg class="empty-icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
+        <div class="empty-title">Noch keine Artikel</div>
+        <div class="empty-desc">Lege deinen ersten Artikel an.</div>
+        <button class="btn btn-primary" onclick="newArticle()">+ Artikel anlegen</button>
+      </div>
+    </div>`;
+  filterArticles();
+}
+function filterArticles(){
+  const s = (document.getElementById('article-search')?.value || '').toLowerCase();
+  const f = document.getElementById('article-filter')?.value || '';
+  const filtered = state.articles.filter(a => {
+    if (f && a.kategorie !== f) return false;
+    if (s && !`${a.name} ${a.hersteller} ${a.notizen}`.toLowerCase().includes(s)) return false;
+    return true;
+  });
+  const tbody = document.getElementById('articles-tbody');
+  const empty = document.getElementById('articles-empty');
+  if (!tbody) return;
+  if (filtered.length === 0){ tbody.innerHTML = ''; if (empty) empty.hidden = false; return; }
+  if (empty) empty.hidden = true;
+  tbody.innerHTML = filtered.map(a => `
+    <tr>
+      <td><div class="font-medium">${esc(a.name)}</div>${a.notizen?`<div class="text-sm text-muted" style="margin-top:2px">${esc(a.notizen)}</div>`:''}</td>
+      <td>${esc(a.hersteller||'–')}</td>
+      <td><span class="badge">${esc(a.kategorie||'Sonstiges')}</span></td>
+      <td>${esc(a.einheit||'Stk.')}</td>
+      <td class="td-num font-semibold">${fmtEUR(a.ek)}</td>
+      <td>
+        <button class="btn btn-icon btn-ghost" onclick="editArticle('${a.id}')" title="Bearbeiten">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>
+        <button class="btn btn-icon btn-ghost btn-danger" onclick="deleteArticle('${a.id}')" title="Löschen">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </td>
+    </tr>`).join('');
+}
+function newArticle(){ editArticleForm(null); }
+function editArticle(id){ editArticleForm(state.articles.find(a=>a.id===id)); }
+function editArticleForm(article){
+  const isEdit = !!article;
+  const d = article || { name:'', hersteller:'', kategorie:'Modul', einheit:'Stk.', ek:0, notizen:'' };
+  showModal(`
+    <div class="modal-header"><div class="modal-title">${isEdit?'Artikel bearbeiten':'Neuer Artikel'}</div>
+      <button class="btn btn-icon btn-ghost" onclick="closeModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Name *</label><input class="input" id="ae-name" value="${esc(d.name)}" placeholder="z.B. JA Solar JKM460N-54HL4R"></div>
+        <div class="form-group"><label class="form-label">Hersteller</label><input class="input" id="ae-hersteller" value="${esc(d.hersteller)}" placeholder="z.B. JA Solar"></div>
+        <div class="form-group"><label class="form-label">Kategorie</label>
+          <select class="select" id="ae-kategorie">
+            ${['Modul','Wechselrichter','Speicher','Kabel','Montage','Elektro','Sonstiges'].map(c=>`<option ${d.kategorie===c?'selected':''}>${c}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Einheit</label><input class="input" id="ae-einheit" value="${esc(d.einheit||'Stk.')}" placeholder="Stk., m, kg..."></div>
+        <div class="form-group"><label class="form-label">EK Preis *</label><input class="input" id="ae-ek" type="text" inputmode="decimal" value="${d.ek||''}" placeholder="0,00"></div>
+        <div class="form-group full"><label class="form-label">Notizen</label><input class="input" id="ae-notizen" value="${esc(d.notizen||'')}" placeholder="Optional"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="saveArticle(${isEdit?`'${article.id}'`:'null'})">${isEdit?'Speichern':'Anlegen'}</button>
+    </div>`);
+  setTimeout(()=>document.getElementById('ae-name').focus(), 50);
+}
+function saveArticle(id){
+  const name = document.getElementById('ae-name').value.trim();
+  if (!name){ toast('Name ist erforderlich','error'); return; }
+  const data = {
+    name,
+    hersteller: document.getElementById('ae-hersteller').value.trim(),
+    kategorie: document.getElementById('ae-kategorie').value,
+    einheit: document.getElementById('ae-einheit').value.trim(),
+    ek: parseNum(document.getElementById('ae-ek').value),
+    notizen: document.getElementById('ae-notizen').value.trim()
+  };
+  if (id){
+    Object.assign(state.articles.find(a=>a.id===id), data);
+    toast('Artikel aktualisiert');
+  } else {
+    state.articles.push({ id:uid(), ...data });
+    toast('Artikel angelegt');
+  }
+  save(); closeModal(); renderArtikel();
+}
+function deleteArticle(id){
+  const a = state.articles.find(x=>x.id===id);
+  if (!confirm(`Artikel "${a.name}" löschen?`)) return;
+  state.articles = state.articles.filter(x=>x.id!==id);
+  save(); renderArtikel();
+  toast('Artikel gelöscht');
+}
+
+// ============ CATALOG PICKER ============
+function openCatalogPicker(sIdx){
+  if (state.articles.length === 0){
+    showModal(`
+      <div class="modal-header"><div class="modal-title">Katalog ist leer</div>
+        <button class="btn btn-icon btn-ghost" onclick="closeModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="modal-body" style="text-align:center;padding:32px 20px">
+        <div class="empty-desc">Lege zuerst Artikel im Tab "Artikel" an.</div>
+        <button class="btn btn-primary" onclick="closeModal();state.activeTab='artikel';render()">Zum Artikel-Tab</button>
+      </div>`);
+    return;
+  }
+  showModal(`
+    <div class="modal-header"><div class="modal-title">Artikel auswählen</div>
+      <button class="btn btn-icon btn-ghost" onclick="closeModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input class="input mb-4" id="picker-search" placeholder="Suchen..." oninput="filterPicker(${sIdx})">
+      <div id="picker-list" style="max-height:420px;overflow-y:auto"></div>
+    </div>
+    <div class="modal-footer"><div></div><div class="right"><button class="btn" onclick="closeModal()">Abbrechen</button></div></div>`);
+  filterPicker(sIdx);
+  setTimeout(()=>document.getElementById('picker-search').focus(), 50);
+}
+function filterPicker(sIdx){
+  const s = (document.getElementById('picker-search')?.value || '').toLowerCase();
+  const filtered = state.articles.filter(a => !s || `${a.name} ${a.hersteller} ${a.kategorie}`.toLowerCase().includes(s));
+  const list = document.getElementById('picker-list');
+  if (!list) return;
+  if (filtered.length === 0){ list.innerHTML = '<div class="empty"><div class="empty-desc">Keine Artikel gefunden</div></div>'; return; }
+  list.innerHTML = filtered.map(a => `
+    <div onclick="pickArticle(${sIdx},'${a.id}')" style="padding:11px 13px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;transition:all 0.1s" onmouseover="this.style.background='var(--bg-muted)';this.style.borderColor='var(--border-strong)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)'">
+      <div style="min-width:0;flex:1">
+        <div class="font-medium" style="overflow:hidden;text-overflow:ellipsis">${esc(a.name)}</div>
+        <div class="text-sm text-muted">${esc(a.hersteller||'–')} · <span class="badge">${esc(a.kategorie)}</span></div>
+      </div>
+      <div class="td-num font-semibold" style="white-space:nowrap">${fmtEUR(a.ek)} <span class="text-muted text-sm">/ ${esc(a.einheit||'Stk.')}</span></div>
+    </div>`).join('');
+}
+function pickArticle(sIdx,articleId){
+  const a = state.articles.find(x=>x.id===articleId);
+  getActiveProject().sections[sIdx].items.push({
+    id:uid(), name:a.name, anzahl:1, einheit:a.einheit||'Stk.',
+    ekStk:a.ek, stunden:0, ekH:0, aufschlag:30, articleId:a.id
+  });
+  save(); closeModal(); renderKalk();
+  toast(`"${a.name}" hinzugefügt`);
+}
+
+// ============ PROJEKTE PAGE ============
+function renderProjekte(){
+  const page = document.getElementById('page-projekte');
+  page.innerHTML = `
+    <div class="page-header">
+      <div><div class="page-title">Projekte</div><div class="page-subtitle">${state.projects.length} Projekt${state.projects.length!==1?'e':''}</div></div>
+      <div class="header-actions"><button class="btn btn-primary" onclick="newProject()">+ Neues Projekt</button></div>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr>
+          <th>Projekt</th><th>Kunde</th><th class="th-num">kWp</th>
+          <th class="th-num">Positionen</th><th class="th-num">VK</th>
+          <th class="th-num">DB %</th><th style="width:110px"></th>
+        </tr></thead>
+        <tbody>${state.projects.map(p => {
+          const c = calcProject(p);
+          const items = p.sections.reduce((s,x)=>s+x.items.length,0);
+          const isActive = p.id === state.activeProjectId;
+          return `<tr style="${isActive?'background:var(--accent-soft)':''}">
+            <td><div class="font-medium">${esc(p.name)}${isActive?' <span class="badge badge-blue">aktiv</span>':''}</div><div class="text-sm text-muted" style="margin-top:2px">${esc(p.datum||'')}</div></td>
+            <td>${esc(p.kunde||'–')}</td>
+            <td class="td-num">${p.kwp} kWp</td>
+            <td class="td-num">${items}</td>
+            <td class="td-num">${fmtEUR(c.vk)}</td>
+            <td class="td-num">${fmtPct(c.dbPct)}</td>
+            <td><button class="btn btn-sm ${isActive?'btn-primary':''}" onclick="selectProject('${p.id}')">${isActive?'Aktiv':'Öffnen'}</button></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+      ${state.projects.length===0?`<div class="empty">
+        <svg class="empty-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <div class="empty-title">Noch keine Projekte</div>
+        <div class="empty-desc">Erstelle dein erstes Projekt.</div>
+        <button class="btn btn-primary" onclick="newProject()">+ Projekt anlegen</button>
+      </div>`:''}
+    </div>`;
+}
+function selectProject(id){
+  state.activeProjectId = id; state.activeTab = 'kalk'; save(); render();
+}
+
+// ============ BACKUP EXPORT / IMPORT ============
+function exportData(){
+  const blob = new Blob([JSON.stringify({
+    articles: state.articles,
+    projects: state.projects,
+    activeProjectId: state.activeProjectId,
+    exportedAt: new Date().toISOString(),
+    jsonbinId: JSONBIN_BIN_ID
+  }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `kalk-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('Backup heruntergeladen');
+}
+function importData(){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const d = JSON.parse(ev.target.result);
+        if (!d.articles || !d.projects) throw new Error('Ungültiges Format');
+        if (!confirm(`${d.articles.length} Artikel und ${d.projects.length} Projekt(e) importieren?\n\nVorhandene Daten werden ÜBERSCHRIEBEN.`)) return;
+        state.articles = d.articles;
+        state.projects = d.projects;
+        state.activeProjectId = d.activeProjectId || d.projects[0]?.id || null;
+        if (d.jsonbinId){
+          JSONBIN_BIN_ID = d.jsonbinId;
+          localStorage.setItem(JSONBIN_BIN_ID_KEY, JSONBIN_BIN_ID);
+        }
+        save(); render();
+        toast('Daten importiert');
+      } catch (err) {
+        toast('Fehler: ' + err.message, 'error');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+function resetAll(){
+  if (!confirm('Wirklich ALLE Daten löschen (Artikel + Projekte)?')) return;
+  if (!confirm('Wirklich sicher? Die Cloud-Verbindung wird ebenfalls getrennt.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(JSONBIN_BIN_ID_KEY);
+  JSONBIN_BIN_ID = '';
+  state.articles = []; state.projects = []; state.activeProjectId = null;
+  seed(); render();
+  toast('Alles zurückgesetzt');
+}
+
+// ============ MODAL & TOAST ============
+function showModal(html){
+  document.getElementById('modal-root').innerHTML = `<div class="modal-backdrop" onclick="if(event.target===this)closeModal()">${html}</div>`;
+}
+function closeModal(){ document.getElementById('modal-root').innerHTML = ''; }
+function toast(msg, type=''){
+  const c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(()=>el.remove(), 2200);
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+async function manualSync(){
+  if (!isCloudConfigured()){ toast('API-Key nicht gesetzt', 'error'); return; }
+  toast('Synchronisiere…');
+  await cloudSave();
+}
+
+// ============ SEED (leer starten) ============
+function seed(){
+  state.projects = [{
+    id: uid(),
+    name: 'Neues Projekt',
+    kunde: '',
+    adresse: '',
+    kwp: 0,
+    datum: new Date().toISOString().slice(0,10),
+    sections: [
+      { id: uid(), name: 'Module',          items: [] },
+      { id: uid(), name: 'DC-Montage',      items: [] },
+      { id: uid(), name: 'Wechselrichter',  items: [] },
+      { id: uid(), name: 'AC-Montage',      items: [] },
+      { id: uid(), name: 'Speicher',        items: [] },
+      { id: uid(), name: 'Abwicklung',      items: [] }
+    ]
+  }];
+  state.activeProjectId = state.projects[0].id;
+  save();
+}
+
+// ============ INIT ============
+async function init(){
+  const loaded = await load();
+  if (!loaded) seed();
+  document.querySelectorAll('.nav-item').forEach(b =>
+    b.addEventListener('click', () => { state.activeTab = b.dataset.tab; render(); })
+  );
+  render();
+  updateCloudIndicator();
+}
+init();
+</script>
+</body>
+</html>
